@@ -1,32 +1,48 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('portfolioApp', () => ({
         positions: [],
+        totals: [],
         isLoading: false,
         error: null,
         statusFilter: 'all',
         searchQuery: '',
 
         init() {
-            this.fetchPositions();
+            this.fetchData();
         },
 
-        async fetchPositions() {
+        async fetchData() {
             this.isLoading = true;
             this.error = null;
             try {
-                // Ensure the backend URL matches where Uvicorn is running
-                const url = `http://localhost:8000/api/positions?status_filter=${this.statusFilter}`;
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                this.positions = await response.json();
+                await Promise.all([
+                    this.fetchPositions(),
+                    this.fetchTotals()
+                ]);
             } catch (err) {
-                console.error("Failed to fetch positions:", err);
+                console.error("Failed to fetch data:", err);
                 this.error = "Failed to load portfolio data. Make sure the backend Server is running on port 8000.";
             } finally {
                 this.isLoading = false;
             }
+        },
+
+        async fetchPositions() {
+            const url = `http://localhost:8000/api/positions?status_filter=${this.statusFilter}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            this.positions = await response.json();
+        },
+
+        async fetchTotals() {
+            const url = `http://localhost:8000/api/positions/totals?status_filter=${this.statusFilter}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            this.totals = await response.json();
         },
 
         get filteredPositions() {
@@ -39,14 +55,6 @@ document.addEventListener('alpine:init', () => {
                 const isinMatch = (pos.instrument_isin || '').toLowerCase().includes(q);
                 return nameMatch || tickerMatch || isinMatch;
             });
-        },
-
-        get totalInvested() {
-            return this.filteredPositions.reduce((sum, pos) => sum + (pos.total_invested || 0), 0);
-        },
-
-        get totalPnl() {
-            return this.filteredPositions.reduce((sum, pos) => sum + (pos.pnl || 0), 0);
         },
 
         // Formatters mapping (using shared utils)

@@ -55,6 +55,15 @@ class PositionDTO:
     pnl: float = 0.00
     pnl_percent: float = 0.00
 
+
+@dataclass
+class CurrencyTotalDTO:
+    """Data Transfer Object for Totals grouped by currency."""
+    currency: str = ""
+    symbol: str = ""
+    total_invested: float = 0.00
+    total_pnl: float = 0.00
+
 def _apply_fifo(session, positions: list[Position]) -> list[PositionDTO]:
     """
     Apply FIFO to trades of the same Instrument
@@ -207,3 +216,31 @@ def get_position_summary(session, position: Position):
     p.pnl_percent = ( p.pnl / p.total_invested ) if p.total_invested > 0 else 0.0
 
     return p
+
+
+def get_positions_totals(session, account=None, include_closed=True, include_open=True):
+    """
+    Retrieve positions totals grouped by currency.
+    """
+    positions = get_positions_summary(
+        session, 
+        account=account, 
+        include_closed=include_closed, 
+        include_open=include_open
+    )
+    
+    totals_map = {}
+    for pos in positions:
+        curr = pos.instrument_currency
+        if curr not in totals_map:
+            totals_map[curr] = CurrencyTotalDTO(
+                currency=curr,
+                symbol=pos.instrument_symbol,
+                total_invested=0.0,
+                total_pnl=0.0
+            )
+        
+        totals_map[curr].total_invested += pos.total_invested
+        totals_map[curr].total_pnl += pos.pnl
+    
+    return list(totals_map.values())

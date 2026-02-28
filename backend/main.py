@@ -4,7 +4,7 @@ from typing import Optional
 
 from lib.database import get_session
 from lib.repo.accounts_repository import get_account_by_name
-from service.positions_service import get_positions_summary
+from service.positions_service import get_positions_summary, get_positions_totals
 from service.instruments_service import get_all_instruments
 from service.transactions_service import get_all_transactions
 from service.trades_service import get_all_trades
@@ -51,6 +51,30 @@ def read_positions(
     
     # Serialize to standard list of dicts to avoid serialization issues
     return [vars(p) for p in positions]
+
+@app.get("/api/positions/totals")
+def read_positions_totals(
+    account_name: Optional[str] = "All",
+    status_filter: str = Query("all", description="all, open, or closed"),
+    db = Depends(get_db)
+):
+    include_closed = status_filter in ("all", "closed")
+    include_open = status_filter in ("all", "open")
+    
+    account = None
+    if account_name and account_name.lower() != "all":
+        account = get_account_by_name(db, account_name)
+        if not account:
+            raise HTTPException(status_code=404, detail="Account not found")
+
+    totals = get_positions_totals(
+        db, 
+        account=account, 
+        include_closed=include_closed, 
+        include_open=include_open
+    )
+    
+    return [vars(t) for t in totals]
 
 @app.get("/api/instruments")
 def read_instruments(db = Depends(get_db)):

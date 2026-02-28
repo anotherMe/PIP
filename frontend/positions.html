@@ -53,7 +53,7 @@
         <!-- Controls -->
         <div class="controls">
 
-            <select x-model="statusFilter" @change="fetchPositions">
+            <select x-model="statusFilter" @change="fetchData">
                 <option value="all">Show all positions</option>
                 <option value="open">Show open positions</option>
                 <option value="closed">Show closed positions</option>
@@ -129,15 +129,22 @@
         </div>
 
         <!-- Summary Footer -->
-        <div class="summary-container" x-show="!isLoading && !error && filteredPositions.length > 0">
-            <div class="summary-item">
-                <span class="summary-label">Total Buy</span>
-                <span class="summary-value" x-text="formatMoney(totalInvested, '€')"></span>
-            </div>
-            <div class="summary-item">
-                <span class="summary-label">Total PnL</span>
-                <span class="summary-value" :class="getColorClass(totalPnl)" x-text="formatMoney(totalPnl, '€')"></span>
-            </div>
+        <div class="summary-container" x-show="!isLoading && !error && totals.length > 0"
+            style="display: flex; flex-direction: column; gap: 1rem;">
+            <template x-for="total in totals" :key="total.currency">
+                <div
+                    style="display: flex; gap: 2rem; padding: 1rem; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border-color);">
+                    <div class="summary-item" style="border: none; padding: 0;">
+                        <span class="summary-label" x-text="'Total Buy (' + total.currency + ')'"></span>
+                        <span class="summary-value" x-text="formatMoney(total.total_invested, total.symbol)"></span>
+                    </div>
+                    <div class="summary-item" style="border: none; padding: 0;">
+                        <span class="summary-label" x-text="'Total PnL (' + total.currency + ')'"></span>
+                        <span class="summary-value" :class="getColorClass(total.total_pnl)"
+                            x-text="formatMoney(total.total_pnl, total.symbol)"></span>
+                    </div>
+                </div>
+            </template>
         </div>
 
     </div>
