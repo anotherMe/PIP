@@ -5,6 +5,7 @@ from typing import Optional
 from lib.database import get_session
 from lib.repo.accounts_repository import get_account_by_name
 from service.positions_service import get_positions_summary
+from service.instruments_service import get_all_instruments
 
 app = FastAPI(title="PIP Backend API")
 
@@ -47,3 +48,8 @@ def read_positions(
     
     # Serialize to standard list of dicts to avoid serialization issues
     return [vars(p) for p in positions]
+
+@app.get("/api/instruments")
+def read_instruments(db = Depends(get_db)):
+    instruments = get_all_instruments(db)
+    return instruments

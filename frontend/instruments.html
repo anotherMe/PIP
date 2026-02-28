@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instruments - PIP</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="index.css">
+
+    <!-- AlpineJS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body x-data="instrumentsApp()">
+
+    <div class="container">
+        <header>
+            <h1>
+                <span class="material-symbols-outlined"
+                    style="font-size: 2rem; color: var(--accent-color);">view_list</span>
+                Instruments Library
+            </h1>
+            <nav style="display: flex; gap: 1rem; margin-top: 1rem; align-items: center;">
+                <a href="positions.html"
+                    style="color: var(--text-secondary); text-decoration: none; padding-bottom: 0.25rem;">Positions</a>
+                <a href="instruments.html"
+                    style="color: var(--accent-color); font-weight: 500; text-decoration: none; border-bottom: 2px solid var(--accent-color); padding-bottom: 0.25rem;">Instruments</a>
+            </nav>
+        </header>
+
+        <!-- Controls -->
+        <div class="controls">
+
+            <div class="search-bar" style="width: 100%;">
+                <input type="text" x-model="searchQuery" placeholder="🔍 Search by ISIN, Ticker, or Name...">
+                <button x-show="searchQuery.length > 0" class="clear-btn" @click="searchQuery = ''">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Loader -->
+        <div x-show="isLoading" class="loader"></div>
+
+        <!-- Error Message -->
+        <div x-show="error" x-text="error"
+            style="color: var(--danger-color); padding: 1rem; text-align: center; border: 1px solid var(--danger-color); border-radius: 6px; margin-bottom: 1rem;">
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrapper" x-show="!isLoading && !error">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Instrument</th>
+                        <th>Category</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="inst in filteredInstruments" :key="inst.id">
+                        <tr>
+                            <td>
+                                <div style="font-weight: 500;" x-text="inst.name"></div>
+                                <div
+                                    style="font-size: 12px; color: var(--text-secondary); display: flex; gap: 0.5rem; margin-top: 0.25rem; align-items: center;">
+                                    <span class="badge" x-text="inst.ticker"></span>
+                                    <span x-text="inst.isin"></span>
+                                    <span
+                                        style="font-size: 11px; padding: 2px 4px; border-radius: 4px; background: var(--bg-color-alt); border: 1px solid var(--border-color);"
+                                        x-text="inst.currency"></span>
+                                </div>
+                            </td>
+                            <td x-text="inst.category || '-'"></td>
+                        </tr>
+                    </template>
+                    <tr x-show="filteredInstruments.length === 0">
+                        <td colspan="2" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                            No instruments found matching your criteria.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary Footer -->
+        <div class="summary-container" x-show="!isLoading && !error && filteredInstruments.length > 0">
+            <div class="summary-item">
+                <span class="summary-label">Total Instruments</span>
+                <span class="summary-value" x-text="filteredInstruments.length"></span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- App Logic -->
+    <script src="utils.js"></script>
+    <script src="instruments.js"></script>
+</body>
+
+</html>
