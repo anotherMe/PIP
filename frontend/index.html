@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Investment Portfolio (PIP)</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="index.css">
+
+    <!-- AlpineJS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body x-data="portfolioApp()">
+
+    <div class="container">
+        <header>
+            <h1>
+                <span class="material-symbols-outlined"
+                    style="font-size: 2rem; color: var(--accent-color);">trending_up</span>
+                Current market positions
+            </h1>
+        </header>
+
+        <!-- Controls -->
+        <div class="controls">
+
+            <select x-model="statusFilter" @change="fetchPositions">
+                <option value="all">Show all positions</option>
+                <option value="open">Show open positions</option>
+                <option value="closed">Show closed positions</option>
+            </select>
+
+            <div class="search-bar">
+                <input type="text" x-model="searchQuery" placeholder="🔍 Search by Instrument ISIN, Ticker, or Name...">
+                <button x-show="searchQuery.length > 0" class="clear-btn" @click="searchQuery = ''">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Loader -->
+        <div x-show="isLoading" class="loader"></div>
+
+        <!-- Error Message -->
+        <div x-show="error" x-text="error"
+            style="color: var(--danger-color); padding: 1rem; text-align: center; border: 1px solid var(--danger-color); border-radius: 6px; margin-bottom: 1rem;">
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrapper" x-show="!isLoading && !error">
+            <table>
+                <thead>
+                    <tr>
+                        <th>First Buy On</th>
+                        <th>Instrument</th>
+                        <th>Remaining Qty</th>
+                        <th class="numeric">Total Buy Cost</th>
+                        <th class="numeric">Market Price</th>
+                        <th class="numeric">PnL</th>
+                        <th class="numeric">PnL %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="pos in filteredPositions" :key="pos.position_id">
+                        <tr>
+                            <td x-text="formatDate(pos.opening_date)"></td>
+                            <td>
+                                <div style="font-weight: 500;" x-text="pos.instrument_name"></div>
+                                <div
+                                    style="font-size: 12px; color: var(--text-secondary); display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+                                    <span class="badge" x-text="pos.instrument_ticker"></span>
+                                    <span x-text="pos.instrument_isin"></span>
+                                </div>
+                            </td>
+                            <td x-text="pos.position_closed"></td>
+                            <td class="numeric" x-text="formatMoney(pos.total_invested, pos.instrument_symbol)"></td>
+                            <td class="numeric">
+                                <div x-text="formatMoney(pos.latest_price, pos.instrument_symbol)"></div>
+                                <div style="font-size: 11px; color: var(--text-secondary);"
+                                    x-text="formatDate(pos.latest_price_date)"></div>
+                            </td>
+                            <td class="numeric">
+                                <span :class="getColorClass(pos.pnl)"
+                                    x-text="formatMoney(pos.pnl, pos.instrument_symbol)"></span>
+                            </td>
+                            <td class="numeric">
+                                <span :class="getColorClass(pos.pnl_percent)"
+                                    x-text="formatPercent(pos.pnl_percent)"></span>
+                            </td>
+                        </tr>
+                    </template>
+                    <tr x-show="filteredPositions.length === 0">
+                        <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                            No positions found matching your criteria.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary Footer -->
+        <div class="summary-container" x-show="!isLoading && !error && filteredPositions.length > 0">
+            <div class="summary-item">
+                <span class="summary-label">Total Buy</span>
+                <span class="summary-value" x-text="formatMoney(totalInvested, '€')"></span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Total PnL</span>
+                <span class="summary-value" :class="getColorClass(totalPnl)" x-text="formatMoney(totalPnl, '€')"></span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- App Logic -->
+    <script src="app.js"></script>
+</body>
+
+</html>

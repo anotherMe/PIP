@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.bak
+
+# Virtual Env
+.venv/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# SQLite
+portfolio.db
+
+# IDEs
+.vscode/
+.idea/

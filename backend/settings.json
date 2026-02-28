@@ -1,0 +1,8 @@
+{
+    "database": {
+        "url": "sqlite:///portfolio.db"
+    },
+    "app": {
+        "default_timezone": "Europe/Rome"
+    }
+}
