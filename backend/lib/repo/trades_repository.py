@@ -9,7 +9,7 @@ def get_all_trades(session):
     return session.query(Trade).order_by(Trade.date).all()
     
 def get_all_trades_by_account(session, account):
-    return session.query(Trade).filter_by(account_id=account.id).order_by(Trade.date).all()
+    return session.query(Trade).join(Position).filter(Position.account_id == account.id).order_by(Trade.date).all()
 
 def get_trades_for_position_list(session: Session, position_ids: list[int]) -> list[Trade]:
     
@@ -24,9 +24,24 @@ def get_trades_for_position_list(session: Session, position_ids: list[int]) -> l
 
 def add_trade(session, account, instrument, date, trade_type, quantity, price, description=None):
     
+    # Find active position for this account and instrument
+    position = session.query(Position).filter_by(
+        account_id=account.id, 
+        instrument_id=instrument.id, 
+        closed=False
+    ).first()
+    
+    if not position:
+        position = Position(
+            account_id=account.id,
+            instrument_id=instrument.id,
+            closed=False
+        )
+        session.add(position)
+        session.flush()
+
     trade = Trade(
-        account_id=account.id,
-        instrument_id=instrument.id,
+        position_id=position.id,
         date=date,
         type=trade_type,
         quantity=int(quantity),

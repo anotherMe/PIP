@@ -7,7 +7,26 @@ document.addEventListener('alpine:init', () => {
         statusFilter: 'all',
         searchQuery: '',
 
-        init() {
+        // Account filtering
+        selectedAccount: '',
+        accounts: [],
+
+        async init() {
+            this.accounts = await window.utils.fetchAccounts();
+            // Restore selection AFTER accounts are loaded so Alpine.js finds the option
+            await this.$nextTick();
+            this.selectedAccount = window.utils.state.selectedAccount;
+            this.fetchData();
+
+            // Listen for changes from other components (if any)
+            window.addEventListener('account-changed', (e) => {
+                this.selectedAccount = e.detail;
+                this.fetchData();
+            });
+        },
+
+        updateAccount() {
+            window.utils.state.selectedAccount = this.selectedAccount;
             this.fetchData();
         },
 
@@ -28,7 +47,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         async fetchPositions() {
-            const url = `http://localhost:8000/api/positions?status_filter=${this.statusFilter}`;
+            const url = `http://localhost:8000/api/positions?status_filter=${this.statusFilter}&account_name=${this.selectedAccount}`;
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -37,7 +56,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         async fetchTotals() {
-            const url = `http://localhost:8000/api/positions/totals?status_filter=${this.statusFilter}`;
+            const url = `http://localhost:8000/api/positions/totals?status_filter=${this.statusFilter}&account_name=${this.selectedAccount}`;
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);

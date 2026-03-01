@@ -6,10 +6,10 @@ from lib.models import Transaction
 from lib.database import write_to_db
 
 
-def add_transaction(session, trans_type, amount, account, trade=None, description=None):
+def add_transaction(session, trans_type, amount, account, position_id=None, description=None):
     tr = Transaction(
         account_id = account.id,
-        trade_id=trade.id if trade else None,
+        position_id=position_id,
         date=datetime.now(),
         type=trans_type,
         amount=write_to_db(amount),

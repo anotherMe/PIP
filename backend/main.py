@@ -82,8 +82,17 @@ def read_instruments(db = Depends(get_db)):
     return instruments
 
 @app.get("/api/transactions")
-def read_transactions(db = Depends(get_db)):
-    transactions = get_all_transactions(db)
+def read_transactions(
+    account_name: Optional[str] = "All",
+    db = Depends(get_db)
+):
+    account = None
+    if account_name and account_name.lower() != "all":
+        account = get_account_by_name(db, account_name)
+        if not account:
+            raise HTTPException(status_code=404, detail="Account not found")
+
+    transactions = get_all_transactions(db, account=account)
     return [
         {
             "id": t.id,
@@ -98,8 +107,17 @@ def read_transactions(db = Depends(get_db)):
     ]
 
 @app.get("/api/trades")
-def read_trades(db = Depends(get_db)):
-    trades = get_all_trades(db)
+def read_trades(
+    account_name: Optional[str] = "All",
+    db = Depends(get_db)
+):
+    account = None
+    if account_name and account_name.lower() != "all":
+        account = get_account_by_name(db, account_name)
+        if not account:
+            raise HTTPException(status_code=404, detail="Account not found")
+
+    trades = get_all_trades(db, account=account)
     return [
         {
             "id": t.id,

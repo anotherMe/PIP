@@ -39,5 +39,32 @@ window.utils = {
         if (value > 0) return 'positive';
         if (value < 0) return 'negative';
         return 'neutral';
+    },
+
+    // Shared State management
+    state: {
+        _selectedAccount: localStorage.getItem('selectedAccount') || 'All',
+
+        get selectedAccount() {
+            return this._selectedAccount;
+        },
+
+        set selectedAccount(value) {
+            this._selectedAccount = value;
+            localStorage.setItem('selectedAccount', value);
+            // Dispatch event so other components can react
+            window.dispatchEvent(new CustomEvent('account-changed', { detail: value }));
+        }
+    },
+
+    async fetchAccounts() {
+        try {
+            const response = await fetch('http://localhost:8000/api/accounts');
+            if (!response.ok) throw new Error('Failed to fetch accounts');
+            return await response.json();
+        } catch (err) {
+            console.error(err);
+            return [];
+        }
     }
 };

@@ -68,15 +68,44 @@
     </style>
 </head>
 
-<body>
+<body x-data="{ 
+    selectedAccount: '',
+    accounts: [],
+    async init() {
+        this.accounts = await window.utils.fetchAccounts();
+        // Restore selection AFTER accounts are loaded so Alpine.js finds the option
+        this.$nextTick(() => {
+            this.selectedAccount = window.utils.state.selectedAccount;
+        });
+    },
+    updateAccount() {
+        window.utils.state.selectedAccount = this.selectedAccount;
+    }
+}">
 
     <div class="container">
         <header>
-            <h1>
-                <span class="material-symbols-outlined"
-                    style="font-size: 2.5rem; color: var(--accent-color);">rocket_launch</span>
-                Personal Investment Portfolio
-            </h1>
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <h1>
+                    <span class="material-symbols-outlined"
+                        style="font-size: 2.5rem; color: var(--accent-color);">rocket_launch</span>
+                    Personal Investment Portfolio
+                </h1>
+
+                <div class="account-selector"
+                    style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <span class="material-symbols-outlined" style="color: var(--text-secondary);">account_balance</span>
+                    <select x-model="selectedAccount" @change="updateAccount"
+                        style="background: transparent; border: none; color: var(--text-primary); font-family: inherit; font-size: 0.9rem; outline: none; cursor: pointer;">
+                        <option value="All">All Accounts</option>
+                        <template x-for="acc in accounts" :key="acc.id">
+                            <option :value="acc.name" x-text="acc.name"></option>
+                        </template>
+                    </select>
+                </div>
+            </div>
+
             <nav style="display: flex; gap: 1rem; margin-top: 1rem; align-items: center; flex-wrap: wrap;">
                 <a href="index.html"
                     style="color: var(--accent-color); font-weight: 500; text-decoration: none; border-bottom: 2px solid var(--accent-color); padding-bottom: 0.25rem;">Home</a>
@@ -127,6 +156,9 @@
 
     </div>
 
+    <!-- App Logic -->
+    <script src="utils.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 
 </html>

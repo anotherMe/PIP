@@ -29,11 +29,27 @@
 
     <div class="container">
         <header>
-            <h1>
-                <span class="material-symbols-outlined"
-                    style="font-size: 2rem; color: var(--accent-color);">trending_up</span>
-                Current market positions
-            </h1>
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <h1>
+                    <span class="material-symbols-outlined"
+                        style="font-size: 2rem; color: var(--accent-color);">trending_up</span>
+                    Current market positions
+                </h1>
+
+                <div class="account-selector"
+                    style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <span class="material-symbols-outlined" style="color: var(--text-secondary);">account_balance</span>
+                    <select x-model="selectedAccount" @change="updateAccount"
+                        style="background: transparent; border: none; color: var(--text-primary); font-family: inherit; font-size: 0.9rem; outline: none; cursor: pointer;">
+                        <option value="All">All Accounts</option>
+                        <template x-for="acc in accounts" :key="acc.id">
+                            <option :value="acc.name" x-text="acc.name"></option>
+                        </template>
+                    </select>
+                </div>
+            </div>
+
             <nav style="display: flex; gap: 1rem; margin-top: 1rem; align-items: center; flex-wrap: wrap;">
                 <a href="index.html"
                     style="color: var(--text-secondary); text-decoration: none; padding-bottom: 0.25rem;">Home</a>

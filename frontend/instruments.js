@@ -5,23 +5,22 @@ document.addEventListener('alpine:init', () => {
         error: null,
         searchQuery: '',
 
-        init() {
-            this.fetchInstruments();
+        async init() {
+            this.fetchData();
         },
 
-        async fetchInstruments() {
+        async fetchData() {
             this.isLoading = true;
             this.error = null;
             try {
-                const url = `http://localhost:8000/api/instruments`;
-                const response = await fetch(url);
+                const response = await fetch("http://localhost:8000/api/instruments");
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 this.instruments = await response.json();
             } catch (err) {
                 console.error("Failed to fetch instruments:", err);
-                this.error = "Failed to load instruments data. Make sure the backend Server is running on port 8000.";
+                this.error = "Failed to load instruments. Make sure the backend Server is running on port 8000.";
             } finally {
                 this.isLoading = false;
             }
